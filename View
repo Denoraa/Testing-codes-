@@ -1,0 +1,23 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using System;
+
+public class View : MonoBehaviour
+{
+    //Items that need UI
+    public Text Gold;
+    public Text Health;
+    public Text Magazine;
+
+    public void UpdateView(Model model) {
+
+        Gold.text = "Gold:"+model.Gold;
+        Health.text = "Health:" + model.Health;
+        Magazine.text = "Magazine:" + model.Magazine;
+
+    }
+
+
+}

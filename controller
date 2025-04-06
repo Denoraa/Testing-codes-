@@ -1,0 +1,29 @@
+using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.UI;
+using System;
+
+public class Controller : MonoBehaviour
+{
+    public View m_View;
+
+    public Button AddGold;
+    public Button AddHealth;
+    public Button AddMagazine;
+
+    public void Start()
+    {
+        Debug.Log("Start");
+
+        Model.Instance.AddUpdateEvent(m_View.UpdateView);
+        AddGold.onClick.AddListener(Model.Instance.AddGold);
+        AddHealth.onClick.AddListener(Model.Instance.AddHealth);
+        AddMagazine.onClick.AddListener(Model.Instance.AddMagazine);
+       
+
+    }
+
+
+}

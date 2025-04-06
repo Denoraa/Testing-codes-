@@ -1,0 +1,152 @@
+using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
+using Unity.VisualScripting.FullSerializer;
+using UnityEngine;
+using System.Xml;
+using System.IO;
+using System;
+
+public class Model
+{
+    //数据内容
+    private int gold;
+    private int health;
+    private int magazine;
+    //属性
+    public int Gold { get => gold; }
+    public int Health { get => health; }
+    public int Magazine { get => magazine; }
+    //更新数据
+    public void AddGold()
+    {
+        gold += 10;
+        SaveData();
+    }
+    public void AddHealth()
+    {
+        health += 2;
+        SaveData();
+    }
+    public void AddMagazine()
+    {
+        magazine += 1;
+        SaveData();
+    }
+    //初始化,load data
+    public void Init()
+    {
+        Debug.Log("Initiate");
+        if (File.Exists(Application.dataPath + "/DataXML.text"))//Check is save file exists, if does, create a XmlDoc variable to load the file
+        {
+            XmlDocument xmldocument = new XmlDocument();//create xml type var
+            xmldocument.Load(Application.dataPath + "/DataXML.text"); //load document using var
+
+            XmlNodeList goldNum = xmldocument.GetElementsByTagName("GoldNumber");//create a list from the nood of the xmldoc and get all the elements
+                                                                                   //from the root "Gold Number"
+            gold = int.Parse(goldNum[0].InnerText);//set the gold number equal to the number in xmldoc
+
+            XmlNodeList healthNum = xmldocument.GetElementsByTagName("HealthNumber");
+            health = int.Parse(healthNum[0].InnerText);
+
+            XmlNodeList magazineNum = xmldocument.GetElementsByTagName("MagazineNumber");
+            magazine = int.Parse(magazineNum[0].InnerText);
+
+            Debug.Log("Finish Initiate");
+        }
+        else
+        {
+
+            Debug.Log("Not Founded File");
+
+        }
+
+    }
+    public void SaveData()
+    {
+
+        #region Create XmlDocument 
+        
+        XmlDocument xmlDocument = new XmlDocument();//Make xml document for data save
+        XmlElement root = xmlDocument.CreateElement("SAVE");//create a root which can have data 
+                                                            //be saved under this root
+
+        XmlElement goldNumberElement = xmlDocument.CreateElement("GoldNumber");//save the gold value in
+                                                                               //this tag
+        goldNumberElement.InnerText = Gold.ToString();//place the data inside the tage
+        root.AppendChild(goldNumberElement);//put goldNumber tag under this root we created
+
+
+        XmlElement healthNumberElement = xmlDocument.CreateElement("HealthNumber");
+        healthNumberElement.InnerText = Health.ToString();
+        root.AppendChild(healthNumberElement);
+        
+
+        XmlElement magazineNumberElement = xmlDocument.CreateElement("MagazineNumber");
+        magazineNumberElement.InnerText = Magazine.ToString();
+        root.AppendChild(magazineNumberElement);
+
+
+        xmlDocument.AppendChild(root);
+        xmlDocument.Save(Application.dataPath + "/DataXML.text");//save thge XmlDoc on our PC
+        if (File.Exists(Application.dataPath + "/DataXML"))//check if the file exsist.
+        {
+            Debug.Log("XML FILE SAVED");
+            CallUpdateEvent(); //make anouncment to other parts like UI on the change of Data
+        }
+
+
+        #endregion
+
+    }
+    #region Anouncment/Event system
+
+    private event Action<Model> updateEvent;//create a public anouncement system, to anounce the update of data in VIEW
+    public void AddUpdateEvent(Action<Model> action)//function for registrating events
+    {
+        updateEvent += action; //registrate events 
+        CallUpdateEvent(); //call the anouncment system to anounce
+    }
+
+    private void CallUpdateEvent()//anouncement function
+    {
+      
+        updateEvent?.Invoke(this); //call the event for anouncment
+
+    }
+    #endregion
+
+
+
+    #region Singleton mode
+
+    private static Model model;//create instance for this type   
+    
+    public static Model Instance//create a property
+    {
+        get//this is the getter method for a property, it's like a structure
+        {
+            if (model == null)
+            {
+                Debug.Log("get Instance");
+                model = new Model();
+                model.SaveData();
+                model.Init();
+                
+            }
+
+            return model;
+
+        }
+
+    }
+    //make sure there is only ONE SET of data, easizer for others to obtain and manage
+
+
+
+
+    #endregion
+}
+
+
+
